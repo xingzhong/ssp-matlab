@@ -1,0 +1,48 @@
+README
+rev.1
+
+This is a demo framework for 
+1. replace the regular fft routine to other function
+2. calling a c function in MATLAB
+
+It is already work at my ArchLinux with MATLAB 7.12.0 R2011a
+, and should be work at Macintosh.
+The folder contains three source file 
+
+1. ssp_test.m is test script to demostrate how to use it
+2. sspfft.m is a matlab wrapper to call external c function 
+3. sspfft_1.c is c source code
+
+The file "sspfft_1.c" need be pre-compiled by some compiler.
+I use gcc in Linux, and should use XCode in Macintosh. 
+"mex sspfft_1.c"
+You can checkout infomation in
+http://www.mathworks.com/support/compilers/R2011b/glnxa64.html
+
+The rest of the file is matlab scripts.
+
+How it works:
+
+1. function overloading, 
+
+   When MATLAB to do interpret, it use some precedence rule to figure out 
+   it is variable or other type of function.
+   http://www.mathworks.com/help/techdoc/matlab_prog/f10-60956.html
+
+   "fft" is the built-in function, so if we make "fft" as a variable,
+   MATLAB will interpret "fft" as a variable instead of the function. 
+
+   Therefore, "fft = @sspfft;" will overload the built-in function.
+
+2. C-interface,
+   I write a c function "sspfft_1" inside the c file. After we use mex compile 
+   it, it will generate an object called "sspfft_1.mex***"(depdend on your
+   arch) in your folder. Then you can call this file like the regular matlab script
+
+FIXME:
+   The shortcut right now is change the sspfft_1.c's implementation. Currently,
+   I just doing a dummy vector addtion inside of it. Please replace it using our 
+   opencl fft code.  
+
+Xingzhong
+Dec. 04, 2011
