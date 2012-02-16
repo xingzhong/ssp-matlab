@@ -5,4 +5,4 @@ function y = sspfft(varargin)
 disp('Overload FFT Function')
 
 %% call mex object 
-y = sspfft_1(varargin{:});
+y = sspfft_2(varargin{:});
