@@ -376,7 +376,8 @@ void convertInterleavedToSplit(clFFT_SplitComplex *result_split, clFFT_Complex *
 	}
 }
 
-int runTest(clFFT_Complex *data_i, clFFT_Complex *data_cl, clFFT_Dim3 n, int batchSize, clFFT_Direction dir, clFFT_Dimension dim, 
+
+void runTest(clFFT_Complex *data_i, clFFT_Complex *data_cl, clFFT_Dim3 n, int batchSize, clFFT_Direction dir, clFFT_Dimension dim, 
 			clFFT_DataFormat dataFormat, int numIter, clFFT_TestType testType)
 {	// in Matlab, the data type is interleaved type, here we don't use the split version of this code
 	cl_int err = CL_SUCCESS;
@@ -416,17 +417,17 @@ int runTest(clFFT_Complex *data_i, clFFT_Complex *data_cl, clFFT_Dim3 n, int bat
 		{
 			err = -1;
 			log_error("Out-of-Resources\n");
-			goto cleanup;
+// 			goto cleanup;
 		}
 	}
 	else {
-		data_i  = (clFFT_Complex *) malloc(sizeof(clFFT_Complex)*length);
-		data_cl = (clFFT_Complex *) malloc(sizeof(clFFT_Complex)*length);
+// 		data_i  = (clFFT_Complex *) malloc(sizeof(clFFT_Complex)*length);
+// 		data_cl = (clFFT_Complex *) malloc(sizeof(clFFT_Complex)*length);
 		if(!data_i || !data_cl)
 		{
 			err = -2;
 			log_error("Out-of-Resouces\n");
-			goto cleanup;
+// 			goto cleanup;
 		}
 	}
 	
@@ -445,8 +446,8 @@ int runTest(clFFT_Complex *data_i, clFFT_Complex *data_cl, clFFT_Dim3 n, int bat
 	if(dataFormat == clFFT_SplitComplexFormat) {
 		for(i = 0; i < length; i++)
 		{
-			data_i_split.real[i] = 2.0f * (float) rand() / (float) RAND_MAX - 1.0f;
-			data_i_split.imag[i] = 2.0f * (float) rand() / (float) RAND_MAX - 1.0f;
+// 			data_i_split.real[i] = 2.0f * (float) rand() / (float) RAND_MAX - 1.0f;
+// 			data_i_split.imag[i] = 2.0f * (float) rand() / (float) RAND_MAX - 1.0f;
 			data_cl_split.real[i] = 0.0f;
 			data_cl_split.imag[i] = 0.0f;			
 // 			data_iref.real[i] = data_i_split.real[i];
@@ -456,24 +457,31 @@ int runTest(clFFT_Complex *data_i, clFFT_Complex *data_cl, clFFT_Dim3 n, int bat
 		}
 	}
 	else {
-		for(i = 0; i < length; i++)
-		{
-			data_i[i].real = 2.0f * (float) rand() / (float) RAND_MAX - 1.0f;
-			data_i[i].imag = 2.0f * (float) rand() / (float) RAND_MAX - 1.0f;
-			data_cl[i].real = 0.0f;
-			data_cl[i].imag = 0.0f;			
-// 			data_iref.real[i] = data_i[i].real;
-// 			data_iref.imag[i] = data_i[i].imag;
-// 			data_oref.real[i] = data_iref.real[i];
-// 			data_oref.imag[i] = data_iref.imag[i];	
-		}		
+// 		for(i = 0; i < length; i++)
+// 		{
+// // 			data_i[i].real = 2.0f * (float) rand() / (float) RAND_MAX - 1.0f;
+// // 			data_i[i].imag = 2.0f * (float) rand() / (float) RAND_MAX - 1.0f;
+// 			data_cl[i].real = 0.0f;
+// 			data_cl[i].imag = 0.0f;			
+// // 			data_iref.real[i] = data_i[i].real;
+// // 			data_iref.imag[i] = data_i[i].imag;
+// // 			data_oref.real[i] = data_iref.real[i];
+// // 			data_oref.imag[i] = data_iref.imag[i];	
+// 		}		
 	}
+    
+    //===== added by Ning =====//
+    for(int iii=0;iii<8;iii++)
+    {
+        printf("the input is %f\n",(float)data_i[iii].real);
+    }
+    //=========================//
 	
 	plan = clFFT_CreatePlan( context, n, dim, dataFormat, &err );
 	if(!plan || err) 
 	{
 		log_error("clFFT_CreatePlan failed\n");
-		goto cleanup;
+// 		goto cleanup;
 	}
 	
 	//clFFT_DumpPlan(plan, stdout);
@@ -484,14 +492,14 @@ int runTest(clFFT_Complex *data_i, clFFT_Complex *data_cl, clFFT_Dim3 n, int bat
 	    if(!data_in_real || err) 
 	    {
 			log_error("clCreateBuffer failed\n");
-			goto cleanup;
+// 			goto cleanup;
 	    }
 		
 		data_in_imag = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, length*sizeof(float), data_i_split.imag, &err);
 	    if(!data_in_imag || err) 
 	    {
 			log_error("clCreateBuffer failed\n");
-			goto cleanup;
+// 			goto cleanup;
 	    }
 		
 		if(testType == clFFT_OUT_OF_PLACE)
@@ -500,14 +508,14 @@ int runTest(clFFT_Complex *data_i, clFFT_Complex *data_cl, clFFT_Dim3 n, int bat
 			if(!data_out_real || err) 
 			{
 				log_error("clCreateBuffer failed\n");
-				goto cleanup;
+// 				goto cleanup;
 			}
 			
 			data_out_imag = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, length*sizeof(float), data_cl_split.imag, &err);
 			if(!data_out_imag || err) 
 			{
 				log_error("clCreateBuffer failed\n");
-				goto cleanup;
+// 				goto cleanup;
 			}			
 		}
 		else
@@ -522,7 +530,7 @@ int runTest(clFFT_Complex *data_i, clFFT_Complex *data_cl, clFFT_Dim3 n, int bat
 	    if(!data_in) 
 	    {
 			log_error("clCreateBuffer failed\n");
-			goto cleanup;
+// 			goto cleanup;
 	    }
 		if(testType == clFFT_OUT_OF_PLACE)
 		{
@@ -530,14 +538,21 @@ int runTest(clFFT_Complex *data_i, clFFT_Complex *data_cl, clFFT_Dim3 n, int bat
 			if(!data_out) 
 			{
 				log_error("clCreateBuffer failed\n");
-				goto cleanup;
+// 				goto cleanup;
 			}			
 		}
 		else
 			data_out = data_in;
 	}
 		
-			
+// 	//===== added by Ning =====//
+//     for(i=0;i<8;i++)
+//     {
+//         printf("the input is %f\n",(float)data_i[i].real);
+//     }
+    //=========================//
+    
+    
 	err = CL_SUCCESS;
 	
 	t0 = mach_absolute_time();
@@ -558,7 +573,7 @@ int runTest(clFFT_Complex *data_i, clFFT_Complex *data_cl, clFFT_Dim3 n, int bat
 	if(err) 
 	{
 		log_error("clFFT_Execute\n");
-		goto cleanup;	
+// 		goto cleanup;	
 	}
 	
 	t1 = mach_absolute_time(); 
@@ -581,8 +596,10 @@ int runTest(clFFT_Complex *data_i, clFFT_Complex *data_cl, clFFT_Dim3 n, int bat
 	if(err) 
 	{
 		log_error("clEnqueueReadBuffer failed\n");
-        goto cleanup;
+//         goto cleanup;
 	}	
+    
+    
 
 //     //t0 = mach_absolute_time();
 // 	computeReferenceD(&data_oref, n, batchSize, dim, dir);
@@ -614,40 +631,40 @@ int runTest(clFFT_Complex *data_i, clFFT_Complex *data_cl, clFFT_Dim3 n, int bat
 // 		free(result_split.imag);
 // 	}
 	
-cleanup:
-	clFFT_DestroyPlan(plan);	
-	if(dataFormat == clFFT_SplitComplexFormat) 
-	{
-		if(data_i_split.real)
-			free(data_i_split.real);
-		if(data_i_split.imag)
-			free(data_i_split.imag);
-		if(data_cl_split.real)
-			free(data_cl_split.real);
-		if(data_cl_split.imag)
-			free(data_cl_split.imag);
-		
-		if(data_in_real)
-			clReleaseMemObject(data_in_real);
-		if(data_in_imag)
-			clReleaseMemObject(data_in_imag);
-		if(data_out_real && testType == clFFT_OUT_OF_PLACE)
-			clReleaseMemObject(data_out_real);
-		if(data_out_imag && clFFT_OUT_OF_PLACE)
-			clReleaseMemObject(data_out_imag);
-	}
-	else 
-	{
-		if(data_i)
-			free(data_i);
-		if(data_cl)
-			free(data_cl);
-		
-		if(data_in)
-			clReleaseMemObject(data_in);
-		if(data_out && testType == clFFT_OUT_OF_PLACE)
-			clReleaseMemObject(data_out);
-	}
+// cleanup:
+// 	clFFT_DestroyPlan(plan);	
+// 	if(dataFormat == clFFT_SplitComplexFormat) 
+// 	{
+// 		if(data_i_split.real)
+// 			free(data_i_split.real);
+// 		if(data_i_split.imag)
+// 			free(data_i_split.imag);
+// 		if(data_cl_split.real)
+// 			free(data_cl_split.real);
+// 		if(data_cl_split.imag)
+// 			free(data_cl_split.imag);
+// 		
+// 		if(data_in_real)
+// 			clReleaseMemObject(data_in_real);
+// 		if(data_in_imag)
+// 			clReleaseMemObject(data_in_imag);
+// 		if(data_out_real && testType == clFFT_OUT_OF_PLACE)
+// 			clReleaseMemObject(data_out_real);
+// 		if(data_out_imag && clFFT_OUT_OF_PLACE)
+// 			clReleaseMemObject(data_out_imag);
+// 	}
+// 	else 
+// 	{
+// 		if(data_i)
+// 			free(data_i);
+// 		if(data_cl)
+// 			free(data_cl);
+// 		
+// 		if(data_in)
+// 			clReleaseMemObject(data_in);
+// 		if(data_out && testType == clFFT_OUT_OF_PLACE)
+// 			clReleaseMemObject(data_out);
+// 	}
 	
 // 	if(data_iref.real)
 // 		free(data_iref.real);
@@ -658,7 +675,14 @@ cleanup:
 // 	if(data_oref.imag)
 // 		free(data_oref.imag);
 	
-	return err;
+// 	return err;
+    
+    //===== added by Ning =====//
+    for(i=0;i<16;i++)
+    {
+        printf("the output is %f\n",(float)data_cl[i].real);
+    }
+    //========================//
 }
 
 bool ifLineCommented(const char *line) {
@@ -728,7 +752,14 @@ int sspfft_2(double *input, double *output, double h, mwSize nn) {
         output[iii] = input[iii] + h + 30;
         
     }
-   
+    
+//     //===== added by Ning =====//
+//     for(iii=0;iii<8;iii++)
+//     {
+//         printf("the input is %f\n",(float)input[iii]);
+//     }
+//     //=========================//
+//    
    
     //====== Parameter Define =====//
    
@@ -786,11 +817,19 @@ int sspfft_2(double *input, double *output, double h, mwSize nn) {
 		{
 			data_i[i].real = input[i];
 			data_i[i].imag = 0.0f;
-            data_cl[i].imag = 0.0f;
+            data_cl[i].real = 0.0f;
             data_cl[i].imag = 0.0f;
 
 		}		
 	}
+//     
+//     //===== added by Ning =====//
+//     for(iii=0;iii<8;iii++)
+//     {
+//         printf("the input is %f\n",(float)data_i[iii].real);
+//     }
+//     //=========================//
+   
     
     //===== end of parameter define =====//
     
@@ -904,17 +943,32 @@ int sspfft_2(double *input, double *output, double h, mwSize nn) {
     //===== call the fft kernel =====//
     //===============================//
     
-    err = runTest(data_i, data_cl, n, batchSize, dir, dim, dataFormat, numIter, testType);
+        
+//     //===== added by Ning =====//
+//     for(iii=0;iii<8;iii++)
+//     {
+//         printf("the input is %f\n",(float)data_i[iii].real);
+//     }
+//     //=========================//
+    
+    runTest(data_i, data_cl, n, batchSize, dir, dim, dataFormat, numIter, testType);
     
     log_info("the size is: %d \n", nn);
     log_info("the size1 is: %d \n", ll);
 
     for( iii=0; iii<nn; iii++ )
     {
-        output[iii] = data_cl[iii].real;
+        output[iii] = (double)data_cl[iii].real;
 //         output_q[i] = data_cl[i].imag;
     }	
     //===== Finish: added by Ning =====//
+    
+    //===== added by Ning =====//
+    for(i=0;i<16;i++)
+    {
+        printf("the output is %f\n",(float)data_cl[i].real);
+    }
+    //========================//
     
 // 	char delim[] = " \n";
 // 	char tmpStr[100];
@@ -1024,25 +1078,25 @@ void mexFunction( int nlhs, mxArray *plhs[],
         mexErrMsgIdAndTxt("SSP:fft:nlhs","One output required.");
     }
     /* make sure the first input argument is scalar */
-    if( !mxIsDouble(prhs[0]) || 
-         mxIsComplex(prhs[0]) ||
-         mxGetNumberOfElements(prhs[0])!=1 ) {
+    if( !mxIsDouble(prhs[1]) || 
+         mxIsComplex(prhs[1]) ||
+         mxGetNumberOfElements(prhs[1])!=1 ) {
         mexErrMsgIdAndTxt("SSP:fft:notScalar","h must be a scalar.");
     }
     
     /* check that number of rows in second input argument is 1 */
-    if(mxGetM(prhs[1])!=1) {
+    if(mxGetM(prhs[0])!=1) {
         mexErrMsgIdAndTxt("SSP:fft:notRowVector","Input must be a row vector.");
     }
     
     /* get the value of the scalar input  */
-    h = mxGetScalar(prhs[0]);
+    h = mxGetScalar(prhs[1]);
 
     /* create a pointer to the real data in the input matrix  */
-    input = mxGetPr(prhs[1]);
+    input = mxGetPr(prhs[0]);
 
     /* get dimensions of the input matrix */
-    ncols = mxGetN(prhs[1]);
+    ncols = mxGetN(prhs[0]);
 
     /* create the output matrix */
     plhs[0] = mxCreateDoubleMatrix(1,ncols,mxREAL);
@@ -1051,6 +1105,6 @@ void mexFunction( int nlhs, mxArray *plhs[],
     output = mxGetPr(plhs[0]);
 
     /* call the computational routine */
-    sspfft_2(input,output,h,ncols);
+    int b = sspfft_2(input,output,h,ncols);
 }
 

@@ -15,12 +15,17 @@ fft = @sspfft;
 % only do a simple array add one constant 
 n = 16;
 s = randn(1,n);
-y = fft(n, s);
+y = fft(s,n);
 disp(y);
 
 %% make sure clear the fft variable
 % then fft can be used as regular function
 clear fft;
 
+% n = 16;
+tic;
+tstart=tic;
+% s = randn(1,n);
 yy = fft(s,n);
+t = toc(tstart)
 disp(yy);
