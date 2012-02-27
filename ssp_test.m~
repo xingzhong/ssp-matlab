@@ -13,7 +13,7 @@ fft = @sspfft;
 
 %% dummy fft 
 % only do a simple array add one constant 
-n = 1024;
+n = 1024*1;
 s = randn(1,n);
 y = fft(s,n);
 % disp(y);

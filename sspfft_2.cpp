@@ -470,12 +470,12 @@ void runTest(clFFT_Complex *data_i, clFFT_Complex *data_cl, clFFT_Dim3 n, int ba
 // 		}		
 	}
     
-    //===== added by Ning =====//
-    for(int iii=0;iii<8;iii++)
-    {
-        printf("the input is %f\n",(float)data_i[iii].real);
-    }
-    //=========================//
+//     //===== added by Ning =====//
+//     for(int iii=0;iii<8;iii++)
+//     {
+//         printf("the input is %f\n",(float)data_i[iii].real);
+//     }
+//     //=========================//
 	
 	plan = clFFT_CreatePlan( context, n, dim, dataFormat, &err );
 	if(!plan || err) 
@@ -563,7 +563,7 @@ void runTest(clFFT_Complex *data_i, clFFT_Complex *data_cl, clFFT_Dim3 n, int ba
 	}
 	else
 	{
-	    log_info("I am here \n");
+// 	    log_info("I am here \n");
         for(iter = 0; iter < numIter; iter++) 
 			err |= clFFT_ExecuteInterleaved(queue, plan, batchSize, dir, data_in, data_out, 0, NULL, NULL);
 	}
@@ -677,12 +677,12 @@ void runTest(clFFT_Complex *data_i, clFFT_Complex *data_cl, clFFT_Dim3 n, int ba
 	
 // 	return err;
     
-    //===== added by Ning =====//
-    for(i=0;i<16;i++)
-    {
-        printf("the output is %f\n",(float)data_cl[i].real);
-    }
-    //========================//
+//     //===== added by Ning =====//
+//     for(i=0;i<16;i++)
+//     {
+//         printf("the output is %f\n",(float)data_cl[i].real);
+//     }
+//     //========================//
 }
 
 bool ifLineCommented(const char *line) {
@@ -740,18 +740,18 @@ checkMemRequirements(clFFT_Dim3 n, int batchSize, clFFT_TestType testType, cl_ul
 //======================================//
 //===== start of the fft main code =====//
 //======================================//
-int sspfft_2(double *input, double *output, double h, mwSize nn) {
+int sspfft_2(double *input_r, double *input_i, double *output_r, double *output_i, double h, mwSize nn) {
    
     mwSize iii;
     
     //===== case 1: the inputs are integer numbers; size of data is the same as nn =====//
    
    
-    /* multiply each element y by x */
-    for (iii=0; iii<nn; iii++) {
-        output[iii] = input[iii] + h + 30;
-        
-    }
+//     /* multiply each element y by x */
+//     for (iii=0; iii<nn; iii++) {
+//         output_r[iii] = input_r[iii] + h + 30;
+//         
+//     }
     
 //     //===== added by Ning =====//
 //     for(iii=0;iii<8;iii++)
@@ -775,7 +775,7 @@ int sspfft_2(double *input, double *output, double h, mwSize nn) {
     
 	clFFT_Direction dir = clFFT_Forward; //clFFT_Inverse
 	
-    int numIter = 1000;
+    int numIter = 1;
 	
 	int batchSize = 1;
 	
@@ -815,7 +815,7 @@ int sspfft_2(double *input, double *output, double h, mwSize nn) {
 	else {
 		for(i = 0; i < ll; i++)
 		{
-			data_i[i].real = input[i];
+			data_i[i].real = input_r[i];
 			data_i[i].imag = 0.0f;
             data_cl[i].real = 0.0f;
             data_cl[i].imag = 0.0f;
@@ -958,17 +958,18 @@ int sspfft_2(double *input, double *output, double h, mwSize nn) {
 
     for( iii=0; iii<nn; iii++ )
     {
-        output[iii] = (double)data_cl[iii].real;
+        output_r[iii] = (double)data_cl[iii].real;
+        output_i[iii] = (double)data_cl[iii].imag;
 //         output_q[i] = data_cl[i].imag;
     }	
     //===== Finish: added by Ning =====//
     
-    //===== added by Ning =====//
-    for(i=0;i<16;i++)
-    {
-        printf("the output is %f\n",(float)data_cl[i].real);
-    }
-    //========================//
+//     //===== added by Ning =====//
+//     for(i=0;i<16;i++)
+//     {
+//         printf("the output is %f\n",(float)data_cl[i].imag);
+//     }
+//     //========================//
     
 // 	char delim[] = " \n";
 // 	char tmpStr[100];
@@ -1065,9 +1066,9 @@ void mexFunction( int nlhs, mxArray *plhs[],
                   int nrhs, const mxArray *prhs[])
 {
     double h;              /* input scalar */
-    double *input;               /* 1xN input matrix */
+    double *input_r, *input_i;               /* 1xN input matrix */
     mwSize ncols;                   /* size of matrix */
-    double *output;              /* output matrix */
+    double *output_r, *output_i;              /* output matrix */
 //     double *output_q;
 
     /* check for proper number of arguments */
@@ -1077,7 +1078,7 @@ void mexFunction( int nlhs, mxArray *plhs[],
     if(nlhs!=1) {
         mexErrMsgIdAndTxt("SSP:fft:nlhs","One output required.");
     }
-    /* make sure the first input argument is scalar */
+    /* make sure the 2nd input argument is scalar */
     if( !mxIsDouble(prhs[1]) || 
          mxIsComplex(prhs[1]) ||
          mxGetNumberOfElements(prhs[1])!=1 ) {
@@ -1093,18 +1094,23 @@ void mexFunction( int nlhs, mxArray *plhs[],
     h = mxGetScalar(prhs[1]);
 
     /* create a pointer to the real data in the input matrix  */
-    input = mxGetPr(prhs[0]);
+    input_r = mxGetPr(prhs[0]);
+    input_i = mxGetPi(prhs[0]);
+    
 
     /* get dimensions of the input matrix */
     ncols = mxGetN(prhs[0]);
 
     /* create the output matrix */
-    plhs[0] = mxCreateDoubleMatrix(1,ncols,mxREAL);
+    plhs[0] = mxCreateDoubleMatrix(1,ncols,mxCOMPLEX);
 
     /* get a pointer to the real data in the output matrix */
-    output = mxGetPr(plhs[0]);
+    output_r = mxGetPr(plhs[0]);
+    output_i = mxGetPi(plhs[0]);
 
     /* call the computational routine */
-    int b = sspfft_2(input,output,h,ncols);
+    int b = sspfft_2(input_r,input_i,output_r,output_i,h,ncols);
+    
+    return;
 }
 
